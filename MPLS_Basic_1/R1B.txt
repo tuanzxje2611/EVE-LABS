@@ -1,0 +1,16 @@
+en
+conf t
+
+hostname R1B
+
+int loopback0
+ ip address 1.1.1.1 255.255.255.255
+int e0/2
+ ip address 192.168.12.1 255.255.255.0
+ no shutdown
+ ex
+
+router bgp 1
+ neighbor 192.168.12.2 remote-as 2345
+ network 1.1.1.1 mask 255.255.255.255
+
