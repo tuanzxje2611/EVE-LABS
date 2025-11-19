@@ -7,11 +7,70 @@ ip address 192.168.23.2 255.255.255.0
 no shutdown
 ex
 int loopback 0
-ip address 2.2.2.2 255.255.255.0
+ip address 2.2.2.2 255.255.255.255
 ex
 router ospf 1
 router-id 2.2.2.2
 network 192.168.23.0 0.0.0.255 area 0
-network 2.2.2.0 0.0.0.255 area 0
+network 2.2.2.2 0.0.0. area 0
 ex
+
+!********* MPLS ********
+int e0/0 
+mpls ip 
+end
+show mpls ldp neighbor 		!****Check mpls ldp
+
+
+!********* iBGP cho các router PE (R2, R5) ********
+router bgp 2345
+ neighbor 5.5.5.5 remote-as 2345
+ neighbor 5.5.5.5 update-source Loopback0
+
+!********* VPNv4/VPN label cho vùng iBGP giữa các PE ********
+router bgp 2345
+ address-family vpnv4
+  neighbor 5.5.5.5 activate
+  end
+
+#show bgp vpnv4 unicast all summary 
+
+!********* Tạo vrf cho customers A********
+ip vrf Customer_A
+ rd 16:16
+ route-target export 1:6
+ route-target import 6:1
+
+int e0/1
+ ip vrf forwarding Customer_A
+ ip address 192.168.12.2 255.255.255.0
+ no shutdown
+end
+
+!***** Cau hinh static route *****
+ip route vrf Customer_A 1.1.1.0 255.255.255.0 192.168.12.1
+
+
+!***** Redistribute static vao BGP *****
+router bgp 2345
+ address-family ipv4 vrf Customer_A
+ redistribute static
+
+
+
+!********* Tạo vrf cho customers B********
+ip vrf Customer_B
+ rd 11:66
+ route-target both 11:66
+
+int e0/2
+ ip vrf forwarding Customer_B
+ ip address 192.168.12.2 255.255.255.0
+ no shutdown
+ex
+
+router bgp 2345
+ address-family ipv4 vrf Customer_B
+  neighbor 192.168.12.1 remote-as 1
+
 
