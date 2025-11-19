@@ -9,7 +9,8 @@ Mạng được chia thành 3 phần chính:
 1.  **MPLS Core (Provider/P & Provider Edge/PE):** Gồm các Router R2, R3, R4, R5.
 2.  **Customer A:** Gồm các Router R1A và R6A.
 3.  **Customer B:** Gồm các Router R1B và R6B.
-  <img width="1398" height="536" alt="Screenshot 2025-11-19 224700" src="https://github.com/user-attachments/assets/9f007326-66bd-449a-bd6d-6cbe957ce738" />
+  <img width="1332" height="547" alt="Screenshot 2025-11-19 225501" src="https://github.com/user-attachments/assets/1bc48f12-35b6-4906-9c7d-61e925a9fff9" />
+
 ## 🛠️ Chi tiết Cấu hình Khách hàng
 
 ### 1. Khách hàng A (Customer A) - Sử dụng Static Routing
