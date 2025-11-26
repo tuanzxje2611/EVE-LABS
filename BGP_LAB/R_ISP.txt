@@ -1,0 +1,63 @@
+en
+conf t
+hostname ISP
+line console 0
+exec-timeout 0 0
+no ip domain lookup
+
+int e0/0
+ ip address 203.0.113.2 255.255.255.252
+ no shutdown
+ ipv6 address 2001:db8::2/64
+
+int loopback 0
+ ip address 10.0.0.1 255.255.255.255
+ ipv6 address 2001:DB8:1::1/128 
+
+int loopback 1
+ ip address 12.34.0.1 255.255.0.0
+ ipv6 address 2001:DB8:12:34::1/64 
+
+int loopback 2
+ ip address 23.45.0.1 255.255.0.0
+ ipv6 address 2001:DB8:23:45::1/64 
+
+int loopback 3
+ ip address 66.77.0.1 255.255.128.0
+ ipv6 address 2001:DB8:66:77::1/64 
+
+!********* BGP *******
+router bgp 999
+ neighbor 203.0.113.1 remote-as 1
+
+ 
+
+!********* IPv6 eBGP Peering *******
+ipv6 unicast-routing
+
+router bgp 999
+ neighbor 2001:db8::1 remote-as 1
+ address-family ipv4
+ 	no neighbor 2001:db8::1 activate
+ 	ex
+ address-family ipv6 
+ 	neighbor 2001:db8::1 activate
+
+
+!********* advertise the IPv4 spaces on the loopback of ISP router *******
+router bgp 999
+ address-family ipv4
+ 	redistribute connected
+	network 10.0.0.1 mask 255.255.255.255
+
+!********* Advertise IPv6 address on ISP router *******
+router bgp 999
+address-family ipv6
+ network 2001:0db8:23:45::/64 
+ network 2001:0db8:66:77::/64
+ network 2001:0db8:12:34::/64
+
+
+
+
+ 

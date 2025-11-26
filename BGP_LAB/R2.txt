@@ -1,0 +1,75 @@
+en
+conf t
+hostname R2
+line console 0
+exec-timeout 0 0
+no ip domain lookup
+
+int loopback 0
+ip address 2.2.2.2 255.255.255.255
+int e0/0
+ip address 192.168.12.2 255.255.255.0
+no shutdown
+int e0/1
+ip address 192.168.23.2 255.255.255.0
+no shutdown
+int e0/2
+ip address 192.168.24.2 255.255.255.0
+no shutdown
+
+
+!********* OSPF *******
+router ospf 1
+ network 2.2.2.2 0.0.0.0 area 0
+ network 192.168.23.0 0.0.0.255 area 0
+
+
+!********* BGP *******
+router bgp 23
+ neighbor 3.3.3.3 remote-as 23
+ neighbor 3.3.3.3 update-source Loopback0
+
+!** Check by using 		show ip bgp summary
+ 
+!********* eBGP *******
+router bgp 23
+ neighbor 192.168.12.1 remote-as 1
+ neighbor 192.168.24.4 remote-as 4567
+
+
+!********* prepare AS 23 to receive IPv6 routes via IPv4 eBGP peerings with R1 *******
+ipv6 unicast-routing
+
+router bgp 23
+ address-family ipv6
+ 	neighbor 192.168.12.1 activate
+	neighbor 3.3.3.3 activate
+
+
+!********* advertise the IPv4 addresses of the loopback interfaces *******
+router bgp 23
+network 2.2.2.2 mask 255.255.255.255
+
+
+!********* Next-hop-self for AS23 *******
+router bgp 23
+ address-family ipv4
+ 	neighbor 3.3.3.3 next-hop-self
+
+
+!********* destined for network 23.45.0.0/16 from within AS 23 exit via R2 *******
+ip prefix-list 23_45_via_R2 permit 23.45.0.0/16
+
+route-map SETpreference permit 10
+ match ip address prefix-list 23_45_via_R2 
+ set local-preference 750
+
+route-map SETpreference permit 20
+router bgp 23
+ neighbor 192.168.12.1 route-map SETpreference in 
+end
+clear ip bgp * soft in
+
+
+
+

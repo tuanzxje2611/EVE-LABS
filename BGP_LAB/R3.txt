@@ -1,0 +1,71 @@
+en
+conf t
+hostname R3
+line console 0
+exec-timeout 0 0
+no ip domain lookup
+
+int loopback 0
+ip address 3.3.3.3 255.255.255.255
+int e0/0
+ip address 192.168.13.3 255.255.255.0
+no shutdown
+int e0/1
+ip address 192.168.23.3 255.255.255.0
+no shutdown
+int e0/2
+ip address 192.168.35.3 255.255.255.0
+no shutdown
+
+
+
+!********* OSPF *******
+router ospf 1
+ network 3.3.3.3 0.0.0.0 area 0
+ network 192.168.23.0 0.0.0.255 area 0
+
+
+!********* BGP *******
+router bgp 23
+ neighbor 2.2.2.2 remote-as 23
+ neighbor 2.2.2.2 update-source Loopback0
+
+!********* eBGP *******
+router bgp 23
+ neighbor 192.168.13.1 remote-as 1
+ neighbor 192.168.35.5 remote-as 4567
+
+
+!********* prepare AS 23 to receive IPv6 routes via IPv4 eBGP peerings with R1 *******
+ipv6 unicast-routing
+
+router bgp 23
+ address-family ipv6
+ 	neighbor 192.168.13.1 activate
+	neighbor 2.2.2.2 activate
+
+
+!********* advertise the IPv4 addresses of the loopback interfaces *******
+router bgp 23
+network 3.3.3.3 mask 255.255.255.255
+
+
+!********* Next-hop-self for AS23 *******
+router bgp 23
+ address-family ipv4
+ 	neighbor 2.2.2.2 next-hop-self
+
+
+!********* MED on R3 so that the path via R2 is preferred over the path via R3.( R1--->R9(L0) ) *******
+ip prefix-list R1_2_R9_viaR3 permit 9.9.9.9/32
+
+route-map SETmed permit 10
+ match ip address prefix-list R1_2_R9_viaR3
+ set metric 800
+route-map SETmed permit 20
+
+router bgp 23
+ neighbor 192.168.13.1 route-map SETmed out
+end
+clear ip bgp * soft in
+

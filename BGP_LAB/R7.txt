@@ -1,0 +1,51 @@
+en
+conf t
+hostname R7
+line console 0
+exec-timeout 0 0
+no ip domain lookup
+
+int loopback 0
+ip address 7.7.7.7 255.255.255.255
+int e0/0
+ip address 192.168.57.7 255.255.255.0
+no shutdown
+int e0/1
+ip address 192.168.67.7 255.255.255.0
+no shutdown
+
+
+!********* OSPF *******
+router ospf 1
+ network 7.7.7.7 0.0.0.0 area 0
+ network 192.168.57.0 0.0.0.255 area 0
+ network 192.168.67.0 0.0.0.255 area 0
+
+
+!********* BGP *******
+router bgp 67
+ bgp confederation identifier 4567
+ bgp confederation peer 45
+ neighbor 6.6.6.6 remote-as 67
+ neighbor 6.6.6.6 update-source Loopback0
+ neighbor 5.5.5.5 remote-as 45
+ neighbor 5.5.5.5 update-source Loopback0
+ neighbor 5.5.5.5 ebgp-multihop 2
+
+
+!********* advertise the IPv4 addresses of the loopback interfaces *******
+router bgp 67
+network 7.7.7.7 mask 255.255.255.255
+
+ 
+ 
+!********* Next-hop-self for AS4567 *******
+router bgp 67
+ neighbor 5.5.5.5 next-hop-self
+ neighbor 6.6.6.6 next-hop-self
+
+
+
+
+
+  

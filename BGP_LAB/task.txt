@@ -1,0 +1,67 @@
+**************************
+The iBGP routers in AS 23 and 4567 use looback for neighbor adjacency config IGP (OSPF) to 
+adevertise these loopback interfaces
+
+
+
+**************************
+Create GRE tunnel between R5 and R9. Without a tunnel, R8 will drop traffic because it doesn't run BGP
+
+
+
+**************************
+config iBGP in AS 23 and AS 4567 (Sub-AS 45 67) use loopback0
+
+
+
+**************************
+config eBGP multihop for establishment of eBGP peerings
+
+
+
+**************************
+create IPv6 eBGP peerings between R1 and ISP 
+
+
+**************************
+Advertise IPv4 address spaces on the loopback interfaces of the ISP router
+(Redistribute all the connected into the BGP)
+
+
+**************************
+Config AS 23 to receive IPv6 routes via IPV4 eBGP peerings with R1
+(Instead of creating IPv6 eBGP peerings, we can use IPv4 eBGP Peerings to carry IPv6 routes)
+
+**************************
+advertise the IPv4 addresses of the loopback interfaces of the rest of the BGP peers 
+in the network as described in the task list
+
+
+**************************
+Apply the next hop self feature within ASes 23 and 4567 so that the next hop IP for 
+BGP routes is correct,
+
+
+**************************
+BGP Weight Attribute 
+config that the 12.34.0.0/16 be routed from R4 via AS 23 rather than directly via AS 1
+								(use the weight attribute) 
+
+
+**************************
+BGP Local Preference Attribute 
+Configure BGP so that packets destined for network 23.45.0.0/16 from within AS 23 
+always exit AS 23 via router R2. 
+
+
+**************************
+BGP AS Path Prepending 
+any traffic from R1 that is destined to the loopback address of R9 be routed via AS 23 rather than via AS 4567
+
+Configure AS path prepending on R4 and make the path via AS 4567 three times as 
+							long as the path via AS 23. 
+
+
+**************************
+BGP MED Attribute
+Configure MED on R3 so that the path via R2 is preferred over the path via R3.( R1--->R9(L0) )
